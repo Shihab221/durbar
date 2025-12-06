@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -28,11 +28,29 @@
     @apply border border-gray-100 dark:border-zinc-800;
     @apply rounded-2xl;
     @apply transition-all duration-300;
+    @apply relative overflow-hidden;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 140, 0, 0.6), rgba(230, 57, 70, 0.4), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover::before {
+    opacity: 1;
   }
 
   .card-hover {
     @apply hover:shadow-lg hover:-translate-y-1;
-    @apply dark:hover:border-zinc-700;
+    @apply dark:hover:border-mars/30;
+    @apply hover:shadow-mars/10;
   }
 
   /* Section container */
@@ -51,7 +69,7 @@
 
   /* Mars accent glow */
   .mars-glow {
-    box-shadow: 0 0 20px rgba(224, 78, 57, 0.3);
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
   }
 
   /* Button base */
@@ -64,34 +82,84 @@
   }
 
   .btn-primary {
-    @apply bg-mars text-white;
-    @apply hover:bg-mars-dark;
+    background: linear-gradient(135deg, #ff8c00 0%, #ff6b35 50%, #e63946 100%);
+    @apply text-white;
     @apply focus:ring-mars;
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #ffa500 0%, #ff8c00 50%, #ff6b35 100%);
+    box-shadow: 0 6px 20px rgba(255, 140, 0, 0.5);
+    transform: translateY(-1px);
   }
 
   .btn-secondary {
-    @apply bg-gray-100 dark:bg-zinc-800;
-    @apply text-gray-900 dark:text-white;
-    @apply hover:bg-gray-200 dark:hover:bg-zinc-700;
+    background: linear-gradient(135deg, #27272a 0%, #1c1c1e 100%);
+    @apply text-white;
     @apply focus:ring-gray-400;
+    border: 1px solid rgba(255, 140, 0, 0.3);
+  }
+
+  .btn-secondary:hover {
+    background: linear-gradient(135deg, #3f3f46 0%, #27272a 100%);
+    border-color: rgba(255, 140, 0, 0.5);
   }
 
   .btn-outline {
     @apply border-2 border-mars text-mars;
-    @apply hover:bg-mars hover:text-white;
+    background: transparent;
     @apply focus:ring-mars;
+  }
+
+  .btn-outline:hover {
+    background: linear-gradient(135deg, #ff8c00 0%, #e63946 100%);
+    @apply text-white;
   }
 
   /* Section heading */
   .section-heading {
     @apply text-3xl md:text-4xl lg:text-5xl font-bold;
     @apply text-gray-900 dark:text-white;
-    @apply font-display;
+    @apply font-display tracking-wider uppercase;
+    letter-spacing: 0.05em;
   }
 
   .section-subheading {
     @apply text-lg md:text-xl text-gray-600 dark:text-gray-400;
-    @apply max-w-2xl;
+    @apply max-w-2xl font-body;
+  }
+
+  /* Futuristic glow effects */
+  .glow-mars {
+    text-shadow: 0 0 20px rgba(255, 140, 0, 0.5), 0 0 40px rgba(230, 57, 70, 0.3);
+  }
+
+  .border-glow {
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.2), inset 0 0 20px rgba(255, 140, 0, 0.05);
+  }
+
+  /* Scan line effect for futuristic feel */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Gradient text - Orange to Light Red */
+  .text-gradient-mars {
+    background: linear-gradient(135deg, #ffa500 0%, #ff8c00 30%, #ff6b35 60%, #e63946 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* Metallic text */
@@ -116,15 +184,71 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-zinc-700 rounded-full;
+  background: linear-gradient(180deg, #ff8c00, #e63946);
+  @apply rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-zinc-600;
+  background: linear-gradient(180deg, #ffa500, #ff6b35);
 }
 
 /* Selection */
 ::selection {
   @apply bg-mars/20 text-mars-dark dark:text-mars-light;
+}
+
+/* Futuristic grid background */
+.grid-bg {
+  background-image: 
+    linear-gradient(rgba(255, 140, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 140, 0, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Animated gradient border */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animated-border {
+  background: linear-gradient(90deg, #ffa500, #ff8c00, #ff6b35, #e63946, #ff8c00);
+  background-size: 300% 300%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* Cyber corners */
+.cyber-corners {
+  position: relative;
+}
+
+.cyber-corners::before,
+.cyber-corners::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 140, 0, 0.5);
+}
+
+.cyber-corners::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.cyber-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Futuristic text */
+.tech-text {
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 

@@ -12,6 +12,7 @@ import {
   Rocket,
   Linkedin,
   Mail,
+  Gamepad2,
 } from "lucide-react";
 import { PageTransition, ScrollAnimation } from "@/components/page-transition";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,6 +49,14 @@ const departments = [
     description:
       "Focuses on scientific instruments, soil analysis systems, and life detection equipment for Martian exploration.",
     members: 6,
+  },
+  {
+    id: "control",
+    name: "Control",
+    icon: Gamepad2,
+    description:
+      "Handles rover operation, telemetry monitoring, and real-time mission control. Ensures seamless communication between ground station and rover systems.",
+    members: 8,
   },
 ];
 
@@ -104,7 +113,7 @@ const teamMembers = [
 
 const stats = [
   { value: "40+", label: "Team Members" },
-  { value: "4", label: "Departments" },
+  { value: "5", label: "Departments" },
   { value: "5+", label: "Years Active" },
   { value: "10+", label: "Competitions" },
 ];
@@ -209,14 +218,14 @@ export default function AboutPage() {
                 Departments
               </h2>
               <p className="section-subheading mx-auto">
-                Four specialized teams working together to build world-class rovers
+                Five specialized teams working together to build world-class rovers
               </p>
             </div>
           </ScrollAnimation>
 
           <ScrollAnimation delay={0.1}>
             <Tabs defaultValue="mechanical" className="w-full">
-              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-2xl mx-auto mb-8">
+              <TabsList className="grid grid-cols-3 md:grid-cols-5 w-full max-w-3xl mx-auto mb-8">
                 {departments.map((dept) => (
                   <TabsTrigger key={dept.id} value={dept.id} className="gap-2">
                     <dept.icon className="w-4 h-4" />

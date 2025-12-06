@@ -119,13 +119,13 @@ export function HeroSlider() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              {/* Mars accent line */}
-              <div className="w-16 h-1 bg-mars mx-auto mb-6 rounded-full" />
+              {/* Mars accent line with gradient */}
+              <div className="w-20 h-1 mx-auto mb-6 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-500" />
               
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-display text-white mb-4 tracking-tight">
-                {slide.title}
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-display text-white mb-4 tracking-wider uppercase">
+                <span className="text-gradient-mars">{slide.title}</span>
               </h1>
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-8">
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-8 font-body">
                 {slide.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -151,7 +151,7 @@ export function HeroSlider() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={prevSlide}
-          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/20 transition-all"
           aria-label="Previous slide"
         >
           <ChevronLeft className="w-6 h-6" />
@@ -160,7 +160,7 @@ export function HeroSlider() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={nextSlide}
-          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/20 transition-all"
           aria-label="Next slide"
         >
           <ChevronRight className="w-6 h-6" />
@@ -168,7 +168,7 @@ export function HeroSlider() {
       </div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
         {slides.map((_, index) => (
           <button
             key={index}
@@ -178,8 +178,8 @@ export function HeroSlider() {
             }}
             className={`h-2 rounded-full transition-all duration-300 ${
               index === currentSlide
-                ? "w-8 bg-mars"
-                : "w-2 bg-white/40 hover:bg-white/60"
+                ? "w-10 bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 shadow-lg shadow-orange-500/50"
+                : "w-2 bg-white/30 hover:bg-white/50 hover:scale-125"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
