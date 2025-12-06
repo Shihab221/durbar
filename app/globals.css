@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-200 dark:border-zinc-800;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white dark:bg-space-black;
+    @apply text-gray-900 dark:text-gray-100;
+    @apply antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Card styles */
+  .card {
+    @apply bg-white dark:bg-space-gunmetal;
+    @apply border border-gray-100 dark:border-zinc-800;
+    @apply rounded-2xl;
+    @apply transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply hover:shadow-lg hover:-translate-y-1;
+    @apply dark:hover:border-zinc-700;
+  }
+
+  /* Section container */
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-dark {
+    @apply bg-gradient-to-br from-space-black via-space-gunmetal to-space-zinc;
+  }
+
+  .gradient-light {
+    @apply bg-gradient-to-br from-white via-gray-50 to-gray-100;
+  }
+
+  /* Mars accent glow */
+  .mars-glow {
+    box-shadow: 0 0 20px rgba(224, 78, 57, 0.3);
+  }
+
+  /* Button base */
+  .btn {
+    @apply inline-flex items-center justify-center;
+    @apply px-6 py-3 rounded-xl;
+    @apply font-medium text-sm;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-mars text-white;
+    @apply hover:bg-mars-dark;
+    @apply focus:ring-mars;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 dark:bg-zinc-800;
+    @apply text-gray-900 dark:text-white;
+    @apply hover:bg-gray-200 dark:hover:bg-zinc-700;
+    @apply focus:ring-gray-400;
+  }
+
+  .btn-outline {
+    @apply border-2 border-mars text-mars;
+    @apply hover:bg-mars hover:text-white;
+    @apply focus:ring-mars;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+    @apply text-gray-900 dark:text-white;
+    @apply font-display;
+  }
+
+  .section-subheading {
+    @apply text-lg md:text-xl text-gray-600 dark:text-gray-400;
+    @apply max-w-2xl;
+  }
+
+  /* Metallic text */
+  .text-metallic {
+    @apply text-metallic dark:text-metallic-light;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-space-gunmetal;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-zinc-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-zinc-600;
+}
+
+/* Selection */
+::selection {
+  @apply bg-mars/20 text-mars-dark dark:text-mars-light;
+}
+
