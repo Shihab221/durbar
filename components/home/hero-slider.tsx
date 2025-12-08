@@ -11,29 +11,22 @@ const slides = [
     id: 1,
     title: "Team Durbar",
     subtitle: "Forging the Future of Martian Exploration from Bangladesh",
-    image: "/images/hero-rover.jpg",
+    image: "/durbar1.jpg",
     cta: { label: "Explore Projects", href: "/projects" },
   },
   {
     id: 2,
     title: "ARC 2022 Finalists",
     subtitle: "Representing Bangladesh at Anatolian Rover Challenge",
-    image: "/images/hero-competition.jpg",
+    image: "/durbar2.jpg",
     cta: { label: "Our Achievements", href: "/achievements" },
   },
   {
     id: 3,
     title: "Innovation & Excellence",
     subtitle: "Building cutting-edge rovers with passion and precision",
-    image: "/images/hero-team.jpg",
+    image: "/durbar3.jpg",
     cta: { label: "Meet the Team", href: "/about" },
-  },
-  {
-    id: 4,
-    title: "Support Our Mission",
-    subtitle: "Help us reach Mars and beyond",
-    image: "/images/hero-workshop.jpg",
-    cta: { label: "Contribute", href: "/contribute" },
   },
 ];
 
@@ -77,26 +70,29 @@ export function HeroSlider() {
   return (
     <section className="relative h-screen min-h-[600px] max-h-[900px] overflow-hidden">
       {/* Background Image with Overlay */}
-      <div className="absolute inset-0 bg-space-black">
-        {/* Placeholder gradient background when no images */}
-        <div className="absolute inset-0 bg-gradient-to-br from-space-black via-space-gunmetal to-space-zinc" />
-        
-        {/* Subtle star pattern overlay */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `radial-gradient(2px 2px at 20px 30px, #a0a0a0, transparent),
-                              radial-gradient(2px 2px at 40px 70px, #d4d4d8, transparent),
-                              radial-gradient(1px 1px at 90px 40px, #a0a0a0, transparent),
-                              radial-gradient(2px 2px at 130px 80px, #d4d4d8, transparent),
-                              radial-gradient(1px 1px at 160px 120px, #a0a0a0, transparent)`,
-            backgroundSize: '200px 200px',
-          }}
-        />
-        
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-space-black via-space-black/60 to-transparent" />
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={slide.id}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute inset-0 bg-space-black"
+        >
+          {/* Actual background image */}
+          <img 
+            src={slide.image} 
+            alt={slide.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-space-black via-space-black/70 to-space-black/30" />
+          
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 grid-bg opacity-30" />
+        </motion.div>
+      </AnimatePresence>
 
       {/* Slide Content */}
       <AnimatePresence initial={false} custom={direction} mode="wait">

@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { Chatbot } from "@/components/chatbot";
 
 export const metadata: Metadata = {
   title: "Team Durbar | Mars Rover Team from KUET, Bangladesh",
@@ -36,6 +37,7 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1 pt-16 md:pt-20">{children}</main>
           <Footer />
+          <Chatbot />
         </ThemeProvider>
       </body>
     </html>

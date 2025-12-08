@@ -108,7 +108,7 @@ export default function AchievementsPage() {
                 Our Journey
               </span>
               <h1 className="section-heading mb-4">
-                Achievements & <span className="text-mars">Publications</span>
+                Achievements & <span className="text-gradient-mars">Publications</span>
               </h1>
               <p className="section-subheading mx-auto">
                 Milestones that mark our journey and research that drives

@@ -114,7 +114,7 @@ export default function ContributePage() {
                 Support Us
               </span>
               <h1 className="section-heading mb-4">
-                Help Us Reach <span className="text-mars">Mars</span>
+                Help Us Reach <span className="text-gradient-mars">Mars</span>
               </h1>
               <p className="section-subheading mx-auto">
                 Your support enables us to push the boundaries of space

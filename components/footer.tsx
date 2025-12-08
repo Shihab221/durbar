@@ -42,8 +42,8 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-                <Rocket className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/30">
+                <img src="/logo.jpg" alt="Team Durbar Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-xl font-bold font-display tracking-wider text-gray-900 dark:text-white uppercase">
                 Team <span className="text-gradient-mars">Durbar</span>

@@ -126,7 +126,7 @@ export default function ProjectsPage() {
               </span>
               <h1 className="section-heading mb-4">
                 Building the Future of{" "}
-                <span className="text-mars">Mars Exploration</span>
+                <span className="text-gradient-mars">Mars Exploration</span>
               </h1>
               <p className="section-subheading mx-auto">
                 From our first rover to cutting-edge prototypes, explore the

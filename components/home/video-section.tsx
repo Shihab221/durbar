@@ -16,22 +16,22 @@ const videos = [
     id: "video1",
     title: "ARC 2022 Journey",
     description: "Our complete journey at Anatolian Rover Challenge 2022",
-    youtubeId: "dQw4w9WgXcQ", // Replace with actual video ID
-    thumbnail: "/images/video-thumb-1.jpg",
+    youtubeId: "MtGT4qaSBn8",
+    thumbnail: "/durbar1.jpg",
   },
   {
     id: "video2",
     title: "Rover Testing",
     description: "Field testing our latest Mars rover prototype",
-    youtubeId: "dQw4w9WgXcQ", // Replace with actual video ID
-    thumbnail: "/images/video-thumb-2.jpg",
+    youtubeId: "ML1VA-ceKm8",
+    thumbnail: "/durbar2.jpg",
   },
   {
     id: "video3",
     title: "Team Documentary",
     description: "Behind the scenes with Team Durbar",
-    youtubeId: "dQw4w9WgXcQ", // Replace with actual video ID
-    thumbnail: "/images/video-thumb-3.jpg",
+    youtubeId: "DxiYWCe7TLI",
+    thumbnail: "/durbar3.jpg",
   },
 ];
 
@@ -49,7 +49,7 @@ export function VideoSection() {
               Watch & Learn
             </span>
             <h2 className="section-heading mb-4">
-              Watch Our <span className="text-mars">Journey</span>
+              Watch Our <span className="text-gradient-mars">Journey</span>
             </h2>
             <p className="section-subheading mx-auto">
               Experience our story through videos documenting our progress and achievements
@@ -66,8 +66,12 @@ export function VideoSection() {
                 onClick={() => setSelectedVideo(video)}
                 className="group relative w-full aspect-video rounded-2xl overflow-hidden bg-gray-200 dark:bg-zinc-800"
               >
-                {/* Placeholder gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 dark:from-zinc-700 dark:to-zinc-800" />
+                {/* Video thumbnail */}
+                <img 
+                  src={video.thumbnail} 
+                  alt={video.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
                 
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-space-black/40 group-hover:bg-space-black/60 transition-colors duration-300" />

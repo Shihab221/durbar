@@ -130,7 +130,7 @@ export default function AboutPage() {
                 About Us
               </span>
               <h1 className="section-heading mb-4">
-                Meet <span className="text-mars">Team Durbar</span>
+                Meet <span className="text-gradient-mars">Team Durbar</span>
               </h1>
               <p className="section-subheading mx-auto">
                 A passionate group of engineers and scientists from KUET,
@@ -271,7 +271,7 @@ export default function AboutPage() {
                 Our Team
               </span>
               <h2 className="section-heading mb-4">
-                Meet the <span className="text-mars">Leaders</span>
+                Meet the <span className="text-gradient-mars">Leaders</span>
               </h2>
               <p className="section-subheading mx-auto">
                 The talented individuals driving Team Durbar forward
