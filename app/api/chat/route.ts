@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY ;
 
 const SYSTEM_PROMPT = `You are DurbarBot, the official AI assistant for KUET Team Durbar - a passionate Mars and Lunar rover team from Khulna University of Engineering & Technology (KUET), Bangladesh.
 
@@ -45,10 +45,8 @@ Remember: You represent Team Durbar - be professional, knowledgeable, and inspir
 async function tryGeminiAPI(prompt: string): Promise<string | null> {
   // Gemini Flash models only (free tier)
   const attempts = [
-    { version: "v1beta", model: "gemini-1.5-flash" },
-    { version: "v1beta", model: "gemini-1.5-flash-latest" },
-    { version: "v1beta", model: "gemini-1.5-flash-8b" },
-    { version: "v1beta", model: "gemini-2.0-flash-exp" },
+    { version: "v1beta", model: "gemini-2.5-flash" },
+    
   ];
 
   for (const { version, model } of attempts) {
