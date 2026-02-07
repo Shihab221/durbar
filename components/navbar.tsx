@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, Menu, X, Rocket } from "lucide-react";
+import { Moon, Sun, Menu, X, Rocket, LogIn } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -133,6 +133,14 @@ export function Navbar() {
               </motion.button>
             )}
 
+            {/* Login Button - Desktop */}
+            <Link href="/login" className="hidden lg:block">
+              <Button variant="outline" size="sm" className="gap-2">
+                <LogIn className="w-4 h-4" />
+                Login
+              </Button>
+            </Link>
+
             {/* CTA Button - Desktop */}
             <Link href="/contribute" className="hidden lg:block">
               <Button size="sm">
@@ -215,8 +223,14 @@ export function Navbar() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: navLinks.length * 0.05 }}
-                className="pt-2"
+                className="pt-2 space-y-2"
               >
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full gap-2">
+                    <LogIn className="w-4 h-4" />
+                    Login
+                  </Button>
+                </Link>
                 <Link href="/contribute" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full">Support Us</Button>
                 </Link>
