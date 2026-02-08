@@ -6,30 +6,35 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting database seed...");
 
-  // Hash the superadmin password
-  const hashedPassword = await bcrypt.hash("password@123", 12);
+  // Hash the admin password
+  const hashedPassword = await bcrypt.hash("password123", 12);
 
-  // Check if superadmin already exists
+  // Check if admin already exists
   const existingAdmin = await prisma.user.findUnique({
-    where: { username: "admin" },
+    where: { email: "ahemed2019029@stud.kuet.ac.bd" },
   });
 
   if (existingAdmin) {
-    console.log("⚠️ Superadmin already exists, skipping creation");
+    console.log("⚠️ Admin already exists, updating role...");
+    await prisma.user.update({
+      where: { email: "ahemed2019029@stud.kuet.ac.bd" },
+      data: { role: "superadmin", isProfileApproved: true },
+    });
+    console.log("✅ Admin role updated");
   } else {
-    // Create superadmin user
-    const superadmin = await prisma.user.create({
+    // Create admin user
+    const admin = await prisma.user.create({
       data: {
-        username: "admin",
-        email: "admin@teamdurbar.kuet.ac.bd",
+        username: "ahemed2019029",
+        email: "ahemed2019029@stud.kuet.ac.bd",
         password: hashedPassword,
         role: "superadmin",
-        name: "Super Admin",
+        name: "Admin",
         isProfileApproved: true,
       },
     });
 
-    console.log("✅ Superadmin created:", superadmin.username);
+    console.log("✅ Admin created:", admin.email);
   }
 
   console.log("🌱 Database seed completed!");
