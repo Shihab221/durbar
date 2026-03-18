@@ -28,9 +28,9 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Facebook, href: "https://facebook.com/teamdurbar", label: "Facebook" },
-  { icon: Youtube, href: "https://youtube.com/@teamdurbar", label: "YouTube" },
-  { icon: Linkedin, href: "https://linkedin.com/company/teamdurbar", label: "LinkedIn" },
+  { icon: Facebook, href: "https://www.facebook.com/TeamDurbar.KUETMarsRover", label: "Facebook" },
+  { icon: Youtube, href: "https://www.youtube.com/@teamdurbar419", label: "YouTube" },
+  { icon: Linkedin, href: "https://www.linkedin.com/company/kuetmarsrover", label: "LinkedIn" },
   { icon: Instagram, href: "https://instagram.com/teamdurbar", label: "Instagram" },
 ];
 
