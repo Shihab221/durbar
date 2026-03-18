@@ -13,6 +13,7 @@ import {
   Check,
   X,
   LogOut,
+  Award,
 } from "lucide-react";
 import { PageTransition, ScrollAnimation } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,17 @@ interface Blog {
 }
 
 const SUB_TEAMS = ["mechanical", "control", "autonomous", "science", "management"];
+
+// Generate batch years from 2010 to current year
+const generateBatchYears = () => {
+  const currentYear = new Date().getFullYear();
+  const years: string[] = [];
+  for (let year = currentYear; year >= 2010; year--) {
+    years.push(year.toString());
+  }
+  return years;
+};
+const BATCH_YEARS = generateBatchYears();
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -264,6 +276,12 @@ export default function ProfilePage() {
                 </p>
               </div>
               <div className="flex items-center gap-4">
+                {user?.isProfileApproved && (
+                  <Button variant="outline" onClick={() => router.push("/certificate")} className="gap-2">
+                    <Award className="w-4 h-4" />
+                    Certificate
+                  </Button>
+                )}
                 {(user?.role === "admin" || user?.role === "superadmin") && (
                   <Button variant="outline" onClick={() => router.push("/admin")}>
                     Admin Dashboard
@@ -370,11 +388,18 @@ export default function ProfilePage() {
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Batch
                       </label>
-                      <Input
+                      <select
                         value={batch}
                         onChange={(e) => setBatch(e.target.value)}
-                        placeholder="e.g., 2020"
-                      />
+                        className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white"
+                      >
+                        <option value="">Select batch year</option>
+                        {BATCH_YEARS.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

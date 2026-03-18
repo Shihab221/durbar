@@ -51,6 +51,7 @@ model User {
   // Relations
   profileUpdates ProfileUpdate[]
   blogs          Blog[]
+  certificate    Certificate?
 }
 
 // Profile Update requests (pending approval)
@@ -93,4 +94,21 @@ model Blog {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   approvedAt  DateTime?
+}
+
+// Certificate for approved members
+model Certificate {
+  id              String   @id @default(cuid())
+  userId          Int      @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  certificateNumber String  @unique
+  issuedAt        DateTime @default(now())
+  validUntil      DateTime?
+  
+  // Hash for QR code validation
+  validationHash  String   @unique
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
