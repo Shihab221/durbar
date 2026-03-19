@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle, AlertCircle, User, Calendar, Award, Users } from "lucide-react";
 import { PageTransition, ScrollAnimation } from "@/components/page-transition";
@@ -31,8 +32,9 @@ interface ValidationResult {
   member?: MemberInfo;
 }
 
-export default function VerifyCertificatePage({ params }: { params: Promise<{ hash: string }> }) {
-  const { hash } = use(params);
+export default function VerifyCertificatePage() {
+  const params = useParams();
+  const hash = params.hash as string;
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<ValidationResult | null>(null);
 
