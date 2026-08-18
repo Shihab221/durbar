@@ -52,6 +52,8 @@ model User {
   profileUpdates ProfileUpdate[]
   blogs          Blog[]
   certificate    Certificate?
+  researchArticles ResearchArticle[]
+  projects       Project[]
 }
 
 // Profile Update requests (pending approval)
@@ -101,14 +103,66 @@ model Certificate {
   id              String   @id @default(cuid())
   userId          Int      @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   certificateNumber String  @unique
   issuedAt        DateTime @default(now())
   validUntil      DateTime?
-  
+
   // Hash for QR code validation
   validationHash  String   @unique
-  
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+// Research Articles created by admin
+model ResearchArticle {
+  id              Int       @id @default(autoincrement())
+  title           String
+  abstract        String    @db.Text
+  content         String    @db.Text
+  authors         String    // Comma-separated list of authors
+  journal         String?
+  doi             String?
+  publishDate     DateTime?
+  category        String?   // e.g., "Robotics", "AI", "Materials"
+  imageUrl        String?
+  externalLink    String?
+
+  // Publication status
+  published       Boolean   @default(false)
+
+  // Author of the article entry
+  createdById     Int
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Projects (rovers and ongoing projects) managed by admin
+model Project {
+  id              Int       @id @default(autoincrement())
+  name            String
+  category        String    @default("rover") // "rover" or "ongoing"
+  year            String?
+  status          String?
+  description     String    @db.Text
+  imageUrl        String?
+
+  // For rovers: array of {label, value} specs stored as JSON
+  specs           Json?
+  // For rovers: array of feature strings
+  features        String[]
+  // For ongoing projects
+  progress        Int?      // 0-100
+
+  highlight       Boolean   @default(false)
+
+  // Author of the project entry
+  createdById     Int
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }

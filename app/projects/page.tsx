@@ -1,119 +1,54 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Cpu, Cog, Battery, ArrowRight } from "lucide-react";
+import { Calendar, Cpu, Cog, Battery, FileText } from "lucide-react";
 import { PageTransition, ScrollAnimation } from "@/components/page-transition";
-import { Button } from "@/components/ui/button";
 
-const rovers = [
-  {
-    name: "Durbar Rover MK-IV",
-    year: "2023-2024",
-    status: "Current",
-    description:
-      "Our latest and most advanced Mars rover featuring improved mobility, enhanced science payload, and autonomous navigation capabilities.",
-    specs: [
-      { label: "Weight", value: "50 kg" },
-      { label: "Arm Reach", value: "1.2 m" },
-      { label: "Speed", value: "0.5 m/s" },
-      { label: "Battery", value: "10 hrs" },
-    ],
-    features: [
-      "6-wheel rocker-bogie suspension",
-      "5-DOF robotic arm",
-      "HD stereo vision system",
-      "Autonomous navigation",
-    ],
-    image: "/images/rover-mk4.jpg",
-    highlight: true,
-  },
-  {
-    name: "Durbar Rover MK-III",
-    year: "2022",
-    status: "ARC 2022",
-    description:
-      "The rover that made us finalists at Anatolian Rover Challenge 2022. Featured robust design and reliable performance in challenging terrains.",
-    specs: [
-      { label: "Weight", value: "48 kg" },
-      { label: "Arm Reach", value: "1.0 m" },
-      { label: "Speed", value: "0.4 m/s" },
-      { label: "Battery", value: "8 hrs" },
-    ],
-    features: [
-      "Custom suspension system",
-      "4-DOF robotic arm",
-      "GPS navigation",
-      "Soil analysis kit",
-    ],
-    image: "/images/rover-mk3.jpg",
-  },
-  {
-    name: "Durbar Rover MK-II",
-    year: "2021",
-    status: "IPAS 2021",
-    description:
-      "Second generation rover with improved scientific instruments and communication systems. Competed in IPAS 2021.",
-    specs: [
-      { label: "Weight", value: "42 kg" },
-      { label: "Arm Reach", value: "0.8 m" },
-      { label: "Speed", value: "0.3 m/s" },
-      { label: "Battery", value: "6 hrs" },
-    ],
-    features: [
-      "Modular design",
-      "Basic robotic arm",
-      "Camera system",
-      "Radio communication",
-    ],
-    image: "/images/rover-mk2.jpg",
-  },
-  {
-    name: "Durbar Rover MK-I",
-    year: "2020",
-    status: "IRDC 2020",
-    description:
-      "Our first Mars rover that made Bangladesh proud at Indian Rover Design Challenge 2020, securing 1st position among Bangladeshi teams.",
-    specs: [
-      { label: "Weight", value: "38 kg" },
-      { label: "Arm Reach", value: "0.6 m" },
-      { label: "Speed", value: "0.2 m/s" },
-      { label: "Battery", value: "4 hrs" },
-    ],
-    features: [
-      "4-wheel drive",
-      "Simple gripper",
-      "Basic sensors",
-      "Manual control",
-    ],
-    image: "/images/rover-mk1.jpg",
-  },
-];
+interface Spec {
+  label: string;
+  value: string;
+}
 
-const ongoingProjects = [
-  {
-    title: "Autonomous Navigation System",
-    description:
-      "Developing an AI-powered navigation system for fully autonomous rover operation in unknown terrains.",
-    progress: 75,
-    icon: Cpu,
-  },
-  {
-    title: "Advanced Robotic Arm",
-    description:
-      "Designing a 7-DOF robotic arm with precision control for complex manipulation tasks.",
-    progress: 60,
-    icon: Cog,
-  },
-  {
-    title: "Solar Power System",
-    description:
-      "Implementing an efficient solar power system for extended mission durations.",
-    progress: 85,
-    icon: Battery,
-  },
-];
+interface Project {
+  id: number;
+  name: string;
+  category: string;
+  year: string | null;
+  status: string | null;
+  description: string;
+  imageUrl: string | null;
+  specs: any;
+  features: string[];
+  progress: number | null;
+  highlight: boolean;
+  createdAt: string;
+}
+
+const ONGOING_ICONS = [Cpu, Cog, Battery];
 
 export default function ProjectsPage() {
+  const [rovers, setRovers] = useState<Project[]>([]);
+  const [ongoing, setOngoing] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch("/api/projects");
+        const data = await res.json();
+        const all: Project[] = data.projects || [];
+        setRovers(all.filter((p) => p.category === "rover"));
+        setOngoing(all.filter((p) => p.category === "ongoing"));
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   return (
     <PageTransition>
       {/* Hero Section */}
@@ -146,83 +81,116 @@ export default function ProjectsPage() {
             </h2>
           </ScrollAnimation>
 
-          <div className="space-y-8">
-            {rovers.map((rover, index) => (
-              <ScrollAnimation key={rover.name} delay={index * 0.1}>
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  className={`card p-6 md:p-8 ${
-                    rover.highlight ? "ring-2 ring-mars/30" : ""
-                  }`}
-                >
-                  <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Image placeholder */}
-                    <div className="lg:col-span-1">
-                      <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-zinc-700 dark:to-zinc-800 flex items-center justify-center">
-                        <span className="text-6xl">🤖</span>
-                      </div>
-                    </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+            </div>
+          ) : rovers.length === 0 ? (
+            <div className="card p-8 text-center text-gray-500">
+              No rovers added yet.
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {rovers.map((rover, index) => {
+                const specs: Spec[] = Array.isArray(rover.specs)
+                  ? rover.specs
+                  : [];
+                return (
+                  <ScrollAnimation key={rover.id} delay={index * 0.1}>
+                    <motion.div
+                      whileHover={{ y: -4 }}
+                      className={`card p-6 md:p-8 ${
+                        rover.highlight ? "ring-2 ring-mars/30" : ""
+                      }`}
+                    >
+                      <div className="grid lg:grid-cols-3 gap-8">
+                        {/* Image placeholder */}
+                        <div className="lg:col-span-1">
+                          {rover.imageUrl ? (
+                            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-gray-200 dark:bg-zinc-800">
+                              <img
+                                src={rover.imageUrl}
+                                alt={rover.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-zinc-700 dark:to-zinc-800 flex items-center justify-center">
+                              <span className="text-6xl">🤖</span>
+                            </div>
+                          )}
+                        </div>
 
-                    {/* Info */}
-                    <div className="lg:col-span-2">
-                      <div className="flex flex-wrap items-center gap-3 mb-4">
-                        <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                          {rover.name}
-                        </h3>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            rover.highlight
-                              ? "bg-mars text-white"
-                              : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400"
-                          }`}
-                        >
-                          {rover.status}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-500 mb-4">
-                        <Calendar className="w-4 h-4" />
-                        {rover.year}
-                      </div>
-
-                      <p className="text-gray-600 dark:text-gray-400 mb-6">
-                        {rover.description}
-                      </p>
-
-                      {/* Specs */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        {rover.specs.map((spec) => (
-                          <div
-                            key={spec.label}
-                            className="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3"
-                          >
-                            <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">
-                              {spec.label}
-                            </p>
-                            <p className="font-semibold text-gray-900 dark:text-white">
-                              {spec.value}
-                            </p>
+                        {/* Info */}
+                        <div className="lg:col-span-2">
+                          <div className="flex flex-wrap items-center gap-3 mb-4">
+                            <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+                              {rover.name}
+                            </h3>
+                            {rover.status && (
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  rover.highlight
+                                    ? "bg-mars text-white"
+                                    : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400"
+                                }`}
+                              >
+                                {rover.status}
+                              </span>
+                            )}
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Features */}
-                      <div className="flex flex-wrap gap-2">
-                        {rover.features.map((feature) => (
-                          <span
-                            key={feature}
-                            className="px-3 py-1 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 text-xs"
-                          >
-                            {feature}
-                          </span>
-                        ))}
+                          {rover.year && (
+                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-500 mb-4">
+                              <Calendar className="w-4 h-4" />
+                              {rover.year}
+                            </div>
+                          )}
+
+                          <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            {rover.description}
+                          </p>
+
+                          {/* Specs */}
+                          {specs.length > 0 && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                              {specs.map((spec, i) => (
+                                <div
+                                  key={`${spec.label}-${i}`}
+                                  className="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-3"
+                                >
+                                  <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">
+                                    {spec.label}
+                                  </p>
+                                  <p className="font-semibold text-gray-900 dark:text-white">
+                                    {spec.value}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Features */}
+                          {rover.features.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {rover.features.map((feature, i) => (
+                                <span
+                                  key={`${feature}-${i}`}
+                                  className="px-3 py-1 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 text-xs"
+                                >
+                                  {feature}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </ScrollAnimation>
-            ))}
-          </div>
+                    </motion.div>
+                  </ScrollAnimation>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -235,48 +203,59 @@ export default function ProjectsPage() {
             </h2>
           </ScrollAnimation>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {ongoingProjects.map((project, index) => (
-              <ScrollAnimation key={project.title} delay={index * 0.1}>
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  className="card card-hover p-6"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-mars/10 flex items-center justify-center mb-4">
-                    <project.icon className="w-6 h-6 text-mars" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    {project.description}
-                  </p>
-                  {/* Progress bar */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Progress</span>
-                      <span className="text-mars font-medium">
-                        {project.progress}%
-                      </span>
-                    </div>
-                    <div className="h-2 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${project.progress}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, delay: 0.3 }}
-                        className="h-full bg-mars rounded-full"
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              </ScrollAnimation>
-            ))}
-          </div>
+          {ongoing.length === 0 ? (
+            <div className="card p-8 text-center text-gray-500">
+              No ongoing projects added yet.
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {ongoing.map((project, index) => {
+                const Icon = ONGOING_ICONS[index % ONGOING_ICONS.length];
+                const progress = project.progress ?? 0;
+                return (
+                  <ScrollAnimation
+                    key={project.id}
+                    delay={index * 0.1}
+                  >
+                    <motion.div
+                      whileHover={{ y: -4 }}
+                      className="card card-hover p-6"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-mars/10 flex items-center justify-center mb-4">
+                        <Icon className="w-6 h-6 text-mars" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                        {project.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        {project.description}
+                      </p>
+                      {/* Progress bar */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-500">Progress</span>
+                          <span className="text-mars font-medium">
+                            {progress}%
+                          </span>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${progress}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, delay: 0.3 }}
+                            className="h-full bg-mars rounded-full"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  </ScrollAnimation>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </PageTransition>
   );
 }
-
-

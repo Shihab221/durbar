@@ -13,8 +13,9 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/projects", label: "Projects" },
   { href: "/about", label: "About" },
+  { href: "/our-team", label: "Our Team" },
+  { href: "/research-articles", label: "Research" },
   { href: "/achievements", label: "Achievements" },
-  { href: "/contribute", label: "Contribute" },
 ];
 
 export function Navbar() {
@@ -141,13 +142,6 @@ export function Navbar() {
               </Button>
             </Link>
 
-            {/* CTA Button - Desktop */}
-            <Link href="/contribute" className="hidden lg:block">
-              <Button size="sm">
-                Support Us
-              </Button>
-            </Link>
-
             {/* Mobile Menu Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -230,9 +224,6 @@ export function Navbar() {
                     <LogIn className="w-4 h-4" />
                     Login
                   </Button>
-                </Link>
-                <Link href="/contribute" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full">Support Us</Button>
                 </Link>
               </motion.div>
             </div>
