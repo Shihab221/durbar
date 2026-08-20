@@ -1,42 +1,100 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Award, Medal, Calendar } from "lucide-react";
+import { Trophy, Award, Medal, Star, Calendar } from "lucide-react";
 import { ScrollAnimation } from "@/components/page-transition";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const achievements = [
+type IconName = "trophy" | "award" | "medal" | "star";
+
+interface Achievement {
+  icon: IconName;
+  title: string;
+  location: string | null;
+  description: string;
+  year: string | null;
+  highlight: boolean;
+  image?: string | null;
+  imageAlt?: string | null;
+}
+
+const ICON_MAP: Record<IconName, typeof Trophy> = {
+  trophy: Trophy,
+  award: Award,
+  medal: Medal,
+  star: Star,
+};
+
+const fallbackAchievements: Achievement[] = [
   {
-    icon: Trophy,
+    icon: "trophy",
     title: "Finalist – Anatolian Rover Challenge (ARC) 2022",
     location: "Turkey (Onsite)",
     description:
       "Team Durbar's unprecedented success in ARC 2022 onsite round highlights their determination to excel in the field of Mars Rover development. Competing against teams from around the world, Team Durbar showcased their innovative rover designs and technical prowess.",
     year: "2022",
     highlight: true,
+    image: "/achievement-arc-2022.jpg",
+    imageAlt: "Team Durbar's KUET Mars Rover at Anatolian Rover Challenge 2022 in Turkey",
   },
   {
-    icon: Award,
+    icon: "award",
     title: "9th Place – IPAS 2021",
     location: "Virtual",
     description:
       "Secured 9th position globally in the prestigious International Planetary Aerial Systems challenge, demonstrating our team's capabilities in aerial planetary exploration.",
     year: "2021",
     highlight: false,
+    image: "/achievement-ipas-2021.jpg",
+    imageAlt: "IPAS 2021 leaderboard showing KUET Durbar at 9th place with 510.91 points",
   },
   {
-    icon: Medal,
+    icon: "medal",
     title: "10th Place & 1st in Bangladesh – IRDC 2020",
     location: "Virtual",
     description:
       "Achieved 10th place overall and proudly became the first team from Bangladesh to participate and excel in the Indian Rover Design Challenge.",
     year: "2020",
     highlight: false,
+    image: "/achievement-irdc-2020.jpg",
+    imageAlt: "IRDC 2020 rankings showing KUET Durbar at 10th place with 656 points",
   },
 ];
 
 export function AchievementsSection() {
+  const [achievements, setAchievements] =
+    useState<Achievement[]>(fallbackAchievements);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/achievements")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.achievements?.length) return;
+        const mapped: Achievement[] = data.achievements.map((a: any) => ({
+          icon: (["trophy", "award", "medal", "star"].includes(a.icon)
+            ? a.icon
+            : "trophy") as IconName,
+          title: a.title,
+          location: a.location ?? null,
+          description: a.description,
+          year: a.year ?? null,
+          highlight: !!a.highlight,
+          image: a.imageUrl ?? null,
+          imageAlt: a.imageAlt ?? null,
+        }));
+        setAchievements(mapped);
+      })
+      .catch(() => {
+        // Silently keep fallback list if API is unreachable.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section className="py-20 md:py-28 bg-gray-50 dark:bg-space-gunmetal/50 relative overflow-hidden">
       {/* Background decorative elements */}
@@ -138,7 +196,10 @@ export function AchievementsSection() {
                             : "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-700 dark:to-zinc-800 text-gray-600 dark:text-gray-300"
                         }`}
                       >
-                        <achievement.icon className="w-6 h-6 md:w-7 md:h-7" />
+                        {(() => {
+                          const Icon = ICON_MAP[achievement.icon] ?? Trophy;
+                          return <Icon className="w-6 h-6 md:w-7 md:h-7" />;
+                        })()}
                       </div>
 
                       {/* Text content */}
@@ -154,6 +215,22 @@ export function AchievementsSection() {
                         </p>
                       </div>
                     </div>
+
+                    {/* Achievement Image */}
+                    {achievement.image && (
+                      <div
+                        className={`mt-5 rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 ${
+                          index % 2 === 0 ? "md:-ml-6" : "md:-mr-6"
+                        }`}
+                      >
+                        <img
+                          src={achievement.image}
+                          alt={achievement.imageAlt || achievement.title}
+                          className="w-full h-auto object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
                   </motion.div>
                 </div>
               </div>

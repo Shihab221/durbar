@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Trophy,
@@ -14,13 +15,35 @@ import {
 import { PageTransition, ScrollAnimation } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
 
-const achievements = [
+type IconName = "trophy" | "award" | "medal" | "star";
+
+interface Achievement {
+  year: string | null;
+  title: string;
+  location: string | null;
+  icon: IconName;
+  highlight: boolean;
+  image?: string | null;
+  imageAlt?: string | null;
+  description: string;
+}
+
+const ICON_MAP: Record<IconName, typeof Trophy> = {
+  trophy: Trophy,
+  award: Award,
+  medal: Medal,
+  star: Star,
+};
+
+const fallbackAchievements: Achievement[] = [
   {
     year: "2022",
     title: "Finalist – Anatolian Rover Challenge (ARC) 2022",
     location: "Turkey (Onsite)",
-    icon: Trophy,
+    icon: "trophy",
     highlight: true,
+    image: "/achievement-arc-2022.jpg",
+    imageAlt: "Team Durbar's KUET Mars Rover at Anatolian Rover Challenge 2022 in Turkey",
     description:
       "Team Durbar's unprecedented success in ARC 2022 onsite round highlights their determination to excel in the field of Mars Rover development. Competing against teams from around the world, Team Durbar showcased their innovative rover designs and technical prowess, earning a spot among the top finalists. This achievement marks a significant milestone for Bangladesh in international rover competitions.",
   },
@@ -28,7 +51,10 @@ const achievements = [
     year: "2021",
     title: "9th Place – International Planetary Aerial Systems Challenge (IPAS) 2021",
     location: "Virtual",
-    icon: Award,
+    icon: "award",
+    highlight: false,
+    image: "/achievement-ipas-2021.jpg",
+    imageAlt: "IPAS 2021 leaderboard showing KUET Durbar at 9th place with 510.91 points",
     description:
       "Secured 9th position globally in the prestigious IPAS challenge, demonstrating our team's expanding capabilities beyond ground rovers into aerial planetary exploration systems.",
   },
@@ -36,7 +62,10 @@ const achievements = [
     year: "2020",
     title: "10th Place & 1st in Bangladesh – Indian Rover Design Challenge (IRDC) 2020",
     location: "Virtual",
-    icon: Medal,
+    icon: "medal",
+    highlight: false,
+    image: "/achievement-irdc-2020.jpg",
+    imageAlt: "IRDC 2020 rankings showing KUET Durbar at 10th place with 656 points",
     description:
       "Achieved 10th place overall and proudly became the first team from Bangladesh to participate and excel in IRDC, setting a benchmark for Bangladeshi teams in international rover competitions.",
   },
@@ -44,7 +73,8 @@ const achievements = [
     year: "2020",
     title: "Best Newcomer Award – KUET Robotics Club",
     location: "KUET",
-    icon: Star,
+    icon: "star",
+    highlight: false,
     description:
       "Recognized for exceptional debut performance and rapid advancement in the field of robotics within the university.",
   },
@@ -52,7 +82,8 @@ const achievements = [
     year: "2021",
     title: "Innovation Award – National Science & Technology Fair",
     location: "Dhaka",
-    icon: Award,
+    icon: "award",
+    highlight: false,
     description:
       "Received the Innovation Award for our novel approach to rover suspension design at the national level science fair.",
   },
@@ -97,6 +128,37 @@ const publications = [
 ];
 
 export default function AchievementsPage() {
+  const [achievements, setAchievements] =
+    useState<Achievement[]>(fallbackAchievements);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/achievements")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.achievements?.length) return;
+        const mapped: Achievement[] = data.achievements.map((a: any) => ({
+          year: a.year ?? null,
+          title: a.title,
+          location: a.location ?? null,
+          icon: (["trophy", "award", "medal", "star"].includes(a.icon)
+            ? a.icon
+            : "trophy") as IconName,
+          highlight: !!a.highlight,
+          image: a.imageUrl ?? null,
+          imageAlt: a.imageAlt ?? null,
+          description: a.description,
+        }));
+        setAchievements(mapped);
+      })
+      .catch(() => {
+        // Silently keep fallback list if the API is unreachable.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <PageTransition>
       {/* Hero Section */}
@@ -161,7 +223,7 @@ export default function AchievementsPage() {
                   >
                     <motion.div
                       whileHover={{ y: -4 }}
-                      className={`card p-6 ${
+                      className={`card p-6 overflow-hidden ${
                         achievement.highlight ? "ring-2 ring-mars/30" : ""
                       }`}
                     >
@@ -197,9 +259,12 @@ export default function AchievementsPage() {
                               : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400"
                           }`}
                         >
-                          <achievement.icon className="w-6 h-6" />
+                          {(() => {
+                            const Icon = ICON_MAP[achievement.icon] ?? Trophy;
+                            return <Icon className="w-6 h-6" />;
+                          })()}
                         </div>
-                        <div className={index % 2 === 0 ? "md:text-right" : ""}>
+                        <div className={`flex-1 ${index % 2 === 0 ? "md:text-right" : ""}`}>
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                             {achievement.title}
                           </h3>
@@ -211,6 +276,21 @@ export default function AchievementsPage() {
                           </p>
                         </div>
                       </div>
+
+                      {achievement.image && (
+                        <div
+                          className={`mt-5 rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 ${
+                            index % 2 === 0 ? "md:-ml-6" : "md:-mr-6"
+                          }`}
+                        >
+                          <img
+                            src={achievement.image}
+                            alt={achievement.imageAlt || achievement.title}
+                            className="w-full h-auto object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
                     </motion.div>
                   </div>
                 </div>

@@ -29,140 +29,164 @@ enum ApprovalStatus {
 
 // User model
 model User {
-  id             Int              @id @default(autoincrement())
-  username       String           @unique
-  email          String           @unique
-  password       String
-  role           String           @default("user") // user, admin, superadmin
-  
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  email    String @unique
+  password String
+  role     String @default("user") // user, admin, superadmin
+
   // Approved profile fields (visible on /about page)
-  name           String?
-  imageUrl       String?
-  batch          String?
-  roll           String?
-  subTeam        SubTeam?
-  designation    String?
-  contribution   String?
-  isProfileApproved Boolean       @default(false)
-  
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  
+  name              String?
+  imageUrl          String?
+  batch             String?
+  roll              String?
+  subTeam           SubTeam?
+  designation       String?
+  contribution      String?
+  isProfileApproved Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  profileUpdates ProfileUpdate[]
-  blogs          Blog[]
-  certificate    Certificate?
+  profileUpdates   ProfileUpdate[]
+  blogs            Blog[]
+  certificate      Certificate?
   researchArticles ResearchArticle[]
-  projects       Project[]
+  projects         Project[]
+  achievements     Achievement[]
 }
 
 // Profile Update requests (pending approval)
 model ProfileUpdate {
-  id           Int            @id @default(autoincrement())
-  userId       Int
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   name         String?
   imageUrl     String?
   batch        String?
   roll         String?
   subTeam      SubTeam?
   designation  String?
-  contribution String?        @db.Text
-  
-  status       ApprovalStatus @default(pending)
-  reviewedAt   DateTime?
-  reviewedBy   Int?
-  
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  contribution String?  @db.Text
+
+  status     ApprovalStatus @default(pending)
+  reviewedAt DateTime?
+  reviewedBy Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Blog posts
 model Blog {
-  id          Int            @id @default(autoincrement())
-  title       String
-  content     String         @db.Text
-  excerpt     String?        @db.VarChar(500)
-  imageUrls   String[]       @default([])
-  
-  authorId    Int
-  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  status      ApprovalStatus @default(pending)
-  reviewedAt  DateTime?
-  reviewedBy  Int?
-  
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  approvedAt  DateTime?
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.Text
+  excerpt   String?  @db.VarChar(500)
+  imageUrls String[] @default([])
+
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  status     ApprovalStatus @default(pending)
+  reviewedAt DateTime?
+  reviewedBy Int?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  approvedAt DateTime?
 }
 
 // Certificate for approved members
 model Certificate {
-  id              String   @id @default(cuid())
-  userId          Int      @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  certificateNumber String  @unique
-  issuedAt        DateTime @default(now())
-  validUntil      DateTime?
+  certificateNumber String    @unique
+  issuedAt          DateTime  @default(now())
+  validUntil        DateTime?
 
   // Hash for QR code validation
-  validationHash  String   @unique
+  validationHash String @unique
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Research Articles created by admin
 model ResearchArticle {
-  id              Int       @id @default(autoincrement())
-  title           String
-  abstract        String    @db.Text
-  content         String    @db.Text
-  authors         String    // Comma-separated list of authors
-  journal         String?
-  doi             String?
-  publishDate     DateTime?
-  category        String?   // e.g., "Robotics", "AI", "Materials"
-  imageUrl        String?
-  externalLink    String?
+  id           Int       @id @default(autoincrement())
+  title        String
+  abstract     String    @db.Text
+  content      String    @db.Text
+  authors      String // Comma-separated list of authors
+  journal      String?
+  doi          String?
+  publishDate  DateTime?
+  category     String? // e.g., "Robotics", "AI", "Materials"
+  imageUrl     String?
+  externalLink String?
 
   // Publication status
-  published       Boolean   @default(false)
+  published Boolean @default(false)
 
   // Author of the article entry
-  createdById     Int
-  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Projects (rovers and ongoing projects) managed by admin
 model Project {
-  id              Int       @id @default(autoincrement())
-  name            String
-  category        String    @default("rover") // "rover" or "ongoing"
-  year            String?
-  status          String?
-  description     String    @db.Text
-  imageUrl        String?
+  id          Int     @id @default(autoincrement())
+  name        String
+  category    String  @default("rover") // "rover" or "ongoing"
+  year        String?
+  status      String?
+  description String  @db.Text
+  imageUrl    String?
 
   // For rovers: array of {label, value} specs stored as JSON
-  specs           Json?
+  specs    Json?
   // For rovers: array of feature strings
-  features        String[]
+  features String[]
   // For ongoing projects
-  progress        Int?      // 0-100
+  progress Int? // 0-100
 
-  highlight       Boolean   @default(false)
+  highlight Boolean @default(false)
 
   // Author of the project entry
-  createdById     Int
-  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Achievements / awards managed by admin
+model Achievement {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String  @db.Text
+  location    String?
+  year        String?
+  icon        String  @default("trophy") // trophy | award | medal | star
+  imageUrl    String?
+  imageAlt    String?
+  highlight   Boolean @default(false)
+
+  // Display order (lower = earlier in timeline). Optional.
+  order Int @default(0)
+
+  // Author of the achievement entry
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

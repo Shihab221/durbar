@@ -17,6 +17,7 @@ import {
   BookOpen,
   Rocket,
   Pencil,
+  Trophy,
 } from "lucide-react";
 import { PageTransition, ScrollAnimation } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
@@ -162,6 +163,44 @@ const EMPTY_PROJECT_FORM: ProjectForm = {
   highlight: false,
 };
 
+interface AdminAchievement {
+  id: number;
+  title: string;
+  description: string;
+  location: string | null;
+  year: string | null;
+  icon: string;
+  imageUrl: string | null;
+  imageAlt: string | null;
+  highlight: boolean;
+  order: number;
+  createdAt: string;
+}
+
+interface AchievementForm {
+  title: string;
+  description: string;
+  location: string;
+  year: string;
+  icon: "trophy" | "award" | "medal" | "star";
+  imageUrl: string;
+  imageAlt: string;
+  highlight: boolean;
+  order: number;
+}
+
+const EMPTY_ACHIEVEMENT_FORM: AchievementForm = {
+  title: "",
+  description: "",
+  location: "",
+  year: "",
+  icon: "trophy",
+  imageUrl: "",
+  imageAlt: "",
+  highlight: false,
+  order: 0,
+};
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [pendingProfiles, setPendingProfiles] = useState<PendingProfile[]>([]);
@@ -186,6 +225,16 @@ export default function AdminDashboard() {
   const [projectError, setProjectError] = useState<string | null>(null);
   const [projectSuccess, setProjectSuccess] = useState<string | null>(null);
 
+  // Achievements state
+  const [achievements, setAchievements] = useState<AdminAchievement[]>([]);
+  const [achievementDialogOpen, setAchievementDialogOpen] = useState(false);
+  const [editingAchievementId, setEditingAchievementId] = useState<number | null>(null);
+  const [achievementForm, setAchievementForm] =
+    useState<AchievementForm>(EMPTY_ACHIEVEMENT_FORM);
+  const [achievementSubmitting, setAchievementSubmitting] = useState(false);
+  const [achievementError, setAchievementError] = useState<string | null>(null);
+  const [achievementSuccess, setAchievementSuccess] = useState<string | null>(null);
+
   const getToken = () => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("token");
@@ -204,12 +253,13 @@ export default function AdminDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [statsRes, profilesRes, blogsRes, articlesRes, projectsRes] = await Promise.all([
+      const [statsRes, profilesRes, blogsRes, articlesRes, projectsRes, achievementsRes] = await Promise.all([
         fetch("/api/admin/stats", { headers }),
         fetch("/api/admin/pending/profiles", { headers }),
         fetch("/api/admin/pending/blogs", { headers }),
         fetch("/api/admin/research-articles", { headers }),
         fetch("/api/admin/projects", { headers }),
+        fetch("/api/admin/achievements", { headers }),
       ]);
 
       // If the user truly isn't authenticated/admin, the stats endpoint will
@@ -233,13 +283,14 @@ export default function AdminDashboard() {
         return fallback;
       };
 
-      const [statsData, profilesData, blogsData, articlesData, projectsData] =
+      const [statsData, profilesData, blogsData, articlesData, projectsData, achievementsData] =
         await Promise.all([
           safeJson(statsRes, { stats: null }),
           safeJson(profilesRes, { pendingProfiles: [] }),
           safeJson(blogsRes, { pendingBlogs: [] }),
           safeJson(articlesRes, { articles: [] }),
           safeJson(projectsRes, { projects: [] }),
+          safeJson(achievementsRes, { achievements: [] }),
         ]);
 
       // If even stats failed (server error), fall back to a generic message.
@@ -256,6 +307,7 @@ export default function AdminDashboard() {
       setPendingBlogs(blogsData.pendingBlogs || []);
       setResearchArticles(articlesData.articles || []);
       setProjects(projectsData.projects || []);
+      setAchievements(achievementsData.achievements || []);
     } catch (err) {
       console.error("Admin fetch error:", err);
       setError("Failed to load admin data. Make sure you're logged in as admin.");
@@ -510,6 +562,126 @@ export default function AdminDashboard() {
 
       if (res.ok) {
         setProjects((prev) => prev.filter((p) => p.id !== id));
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
+  // ===== Achievement handlers =====
+  const openAchievementDialog = (achievement: AdminAchievement | null = null) => {
+    if (achievement) {
+      setEditingAchievementId(achievement.id);
+      setAchievementForm({
+        title: achievement.title,
+        description: achievement.description,
+        location: achievement.location || "",
+        year: achievement.year || "",
+        icon: (["trophy", "award", "medal", "star"].includes(achievement.icon)
+          ? achievement.icon
+          : "trophy") as AchievementForm["icon"],
+        imageUrl: achievement.imageUrl || "",
+        imageAlt: achievement.imageAlt || "",
+        highlight: achievement.highlight,
+        order: achievement.order ?? 0,
+      });
+    } else {
+      setEditingAchievementId(null);
+      setAchievementForm(EMPTY_ACHIEVEMENT_FORM);
+    }
+    setAchievementError(null);
+    setAchievementSuccess(null);
+    setAchievementDialogOpen(true);
+  };
+
+  const closeAchievementDialog = () => {
+    setAchievementDialogOpen(false);
+    setEditingAchievementId(null);
+    setAchievementForm(EMPTY_ACHIEVEMENT_FORM);
+    setAchievementError(null);
+    setAchievementSuccess(null);
+  };
+
+  const buildAchievementPayload = () => {
+    const payload: any = {
+      title: achievementForm.title,
+      description: achievementForm.description,
+      location: achievementForm.location || undefined,
+      year: achievementForm.year || undefined,
+      icon: achievementForm.icon,
+      imageUrl: achievementForm.imageUrl || undefined,
+      imageAlt: achievementForm.imageAlt || undefined,
+      highlight: achievementForm.highlight,
+      order: achievementForm.order,
+    };
+    return payload;
+  };
+
+  const handleSaveAchievement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAchievementError(null);
+    setAchievementSuccess(null);
+    setAchievementSubmitting(true);
+
+    const token = getToken();
+    const payload = buildAchievementPayload();
+    const isEdit = editingAchievementId !== null;
+    const url = isEdit
+      ? `/api/admin/achievements/${editingAchievementId}`
+      : "/api/admin/achievements";
+    const method = isEdit ? "PATCH" : "POST";
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setAchievementError(data.error || "Failed to save achievement");
+        return;
+      }
+
+      setAchievementSuccess(
+        isEdit
+          ? "Achievement updated successfully!"
+          : "Achievement created successfully!"
+      );
+      fetchData();
+
+      setTimeout(() => {
+        closeAchievementDialog();
+      }, 1200);
+    } catch (err) {
+      setAchievementError("Failed to save achievement. Please try again.");
+    } finally {
+      setAchievementSubmitting(false);
+    }
+  };
+
+  const handleDeleteAchievement = async (id: number) => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this achievement? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    const token = getToken();
+    try {
+      const res = await fetch(`/api/admin/achievements/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        setAchievements((prev) => prev.filter((a) => a.id !== id));
       }
     } catch (err) {
       console.error("Delete failed:", err);
@@ -1418,6 +1590,324 @@ export default function AdminDashboard() {
                             onClick={() => handleDeleteProject(project.id)}
                             className="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                             title="Delete project"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </ScrollAnimation>
+
+          {/* Achievements */}
+          <ScrollAnimation delay={0.5}>
+            <div className="mt-12">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-orange-500" />
+                  Achievements ({achievements.length})
+                </h2>
+
+                <Dialog
+                  open={achievementDialogOpen}
+                  onOpenChange={(open) => {
+                    if (!open) closeAchievementDialog();
+                    else setAchievementDialogOpen(true);
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <Button
+                      className="gap-2"
+                      onClick={() => openAchievementDialog(null)}
+                    >
+                      <Plus className="w-4 h-4" />
+                      New Achievement
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingAchievementId
+                          ? "Edit Achievement"
+                          : "Create New Achievement"}
+                      </DialogTitle>
+                    </DialogHeader>
+
+                    <form
+                      onSubmit={handleSaveAchievement}
+                      className="space-y-4"
+                    >
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                          Title *
+                        </label>
+                        <Input
+                          required
+                          value={achievementForm.title}
+                          onChange={(e) =>
+                            setAchievementForm({
+                              ...achievementForm,
+                              title: e.target.value,
+                            })
+                          }
+                          placeholder="e.g., Finalist – ARC 2022"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                          Description *
+                        </label>
+                        <Textarea
+                          required
+                          value={achievementForm.description}
+                          onChange={(e) =>
+                            setAchievementForm({
+                              ...achievementForm,
+                              description: e.target.value,
+                            })
+                          }
+                          placeholder="Describe the achievement"
+                          rows={4}
+                        />
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                            Location
+                          </label>
+                          <Input
+                            value={achievementForm.location}
+                            onChange={(e) =>
+                              setAchievementForm({
+                                ...achievementForm,
+                                location: e.target.value,
+                              })
+                            }
+                            placeholder="e.g., Turkey (Onsite)"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                            Year
+                          </label>
+                          <Input
+                            value={achievementForm.year}
+                            onChange={(e) =>
+                              setAchievementForm({
+                                ...achievementForm,
+                                year: e.target.value,
+                              })
+                            }
+                            placeholder="e.g., 2022"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                            Icon
+                          </label>
+                          <select
+                            value={achievementForm.icon}
+                            onChange={(e) =>
+                              setAchievementForm({
+                                ...achievementForm,
+                                icon: e.target.value as AchievementForm["icon"],
+                              })
+                            }
+                            className="flex h-12 w-full rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-space-gunmetal px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-mars"
+                          >
+                            <option value="trophy">Trophy</option>
+                            <option value="award">Award</option>
+                            <option value="medal">Medal</option>
+                            <option value="star">Star</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                            Image URL
+                          </label>
+                          <Input
+                            value={achievementForm.imageUrl}
+                            onChange={(e) =>
+                              setAchievementForm({
+                                ...achievementForm,
+                                imageUrl: e.target.value,
+                              })
+                            }
+                            placeholder="/achievement-arc-2022.jpg or https://..."
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Place files in <code>public/</code> and reference
+                            with <code>/filename.ext</code>.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                            Order
+                          </label>
+                          <Input
+                            type="number"
+                            value={achievementForm.order.toString()}
+                            onChange={(e) =>
+                              setAchievementForm({
+                                ...achievementForm,
+                                order: parseInt(e.target.value) || 0,
+                              })
+                            }
+                            placeholder="0"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Lower numbers appear earlier in the timeline.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                          Image Alt Text
+                        </label>
+                        <Input
+                          value={achievementForm.imageAlt}
+                          onChange={(e) =>
+                            setAchievementForm({
+                              ...achievementForm,
+                              imageAlt: e.target.value,
+                            })
+                          }
+                          placeholder="Describe the image for accessibility"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          id="achievement-highlight"
+                          type="checkbox"
+                          checked={achievementForm.highlight}
+                          onChange={(e) =>
+                            setAchievementForm({
+                              ...achievementForm,
+                              highlight: e.target.checked,
+                            })
+                          }
+                          className="w-4 h-4 rounded border-gray-300 text-mars focus:ring-mars"
+                        />
+                        <label
+                          htmlFor="achievement-highlight"
+                          className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                          Highlight as featured achievement
+                        </label>
+                      </div>
+
+                      {achievementError && (
+                        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm">
+                          {achievementError}
+                        </div>
+                      )}
+
+                      {achievementSuccess && (
+                        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-sm">
+                          {achievementSuccess}
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 pt-2">
+                        <Button
+                          type="submit"
+                          disabled={achievementSubmitting}
+                        >
+                          {achievementSubmitting
+                            ? "Saving..."
+                            : editingAchievementId
+                            ? "Update Achievement"
+                            : "Create Achievement"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={closeAchievementDialog}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {achievements.length === 0 ? (
+                <div className="card p-8 text-center text-gray-500">
+                  No achievements yet. Click &quot;New Achievement&quot; to
+                  create one.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {achievements.map((achievement) => (
+                    <motion.div
+                      key={achievement.id}
+                      layout
+                      className="card p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <p className="font-semibold text-gray-900 dark:text-white line-clamp-1">
+                              {achievement.title}
+                            </p>
+                            {achievement.year && (
+                              <span className="inline-block px-2 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 text-xs font-medium">
+                                {achievement.year}
+                              </span>
+                            )}
+                            {achievement.highlight && (
+                              <span className="inline-block px-2 py-0.5 rounded-full bg-mars/10 text-mars text-xs font-medium">
+                                Featured
+                              </span>
+                            )}
+                            {achievement.imageUrl && (
+                              <span className="inline-block px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                                Has image
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500 line-clamp-1">
+                            {achievement.location && `${achievement.location} • `}
+                            Icon: {achievement.icon}
+                            {achievement.order !== 0 &&
+                              ` • Order: ${achievement.order}`}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                            {achievement.description}
+                          </p>
+                          {achievement.imageUrl && (
+                            <p className="text-xs text-gray-400 mt-2 truncate">
+                              Image: <code>{achievement.imageUrl}</code>
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={() => openAchievementDialog(achievement)}
+                            className="p-2 rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                            title="Edit achievement"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAchievement(achievement.id)}
+                            className="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            title="Delete achievement"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
