@@ -47,6 +47,9 @@ export default function SignupPage() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
+      // Notify navbar (and other listeners) of auth change
+      window.dispatchEvent(new Event("auth-change"));
+
       // Redirect to profile page
       router.push("/profile");
     } catch (err) {

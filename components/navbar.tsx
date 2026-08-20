@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, Menu, X, Rocket, LogIn } from "lucide-react";
+import { Moon, Sun, Menu, X, Rocket, LogIn, LogOut, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -20,21 +20,61 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<{ role: string; name?: string | null; username?: string } | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-    
+
+    const syncAuth = () => {
+      const token = localStorage.getItem("token");
+      const userStr = localStorage.getItem("user");
+      if (token && userStr) {
+        try {
+          const parsedUser = JSON.parse(userStr);
+          setUser(parsedUser);
+          setIsLoggedIn(true);
+        } catch {
+          setIsLoggedIn(false);
+          setUser(null);
+        }
+      } else {
+        setIsLoggedIn(false);
+        setUser(null);
+      }
+    };
+
+    syncAuth();
+
+    // Listen for storage changes (login/logout from other tabs/components)
+    window.addEventListener("storage", syncAuth);
+    window.addEventListener("auth-change", syncAuth);
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+      window.removeEventListener("auth-change", syncAuth);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    setUser(null);
+    window.dispatchEvent(new Event("auth-change"));
+    router.push("/");
+  };
 
   return (
     <motion.nav
@@ -134,13 +174,39 @@ export function Navbar() {
               </motion.button>
             )}
 
-            {/* Login Button - Desktop */}
-            <Link href="/login" className="hidden lg:block">
-              <Button variant="outline" size="sm" className="gap-2">
-                <LogIn className="w-4 h-4" />
-                Login
-              </Button>
-            </Link>
+            {/* Login / User Button - Desktop */}
+            {!isLoggedIn ? (
+              <Link href="/login" className="hidden lg:block">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LogIn className="w-4 h-4" />
+                  Login
+                </Button>
+              </Link>
+            ) : (
+              <div className="hidden lg:flex items-center gap-2">
+                <Link
+                  href={
+                    user?.role === "admin" || user?.role === "superadmin"
+                      ? "/admin"
+                      : "/profile"
+                  }
+                >
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <User className="w-4 h-4" />
+                    {user?.name || user?.username || "Profile"}
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="gap-2"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <motion.button
@@ -219,12 +285,41 @@ export function Navbar() {
                 transition={{ delay: navLinks.length * 0.05 }}
                 className="pt-2 space-y-2"
               >
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full gap-2">
-                    <LogIn className="w-4 h-4" />
-                    Login
-                  </Button>
-                </Link>
+                {!isLoggedIn ? (
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full gap-2">
+                      <LogIn className="w-4 h-4" />
+                      Login
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href={
+                        user?.role === "admin" || user?.role === "superadmin"
+                          ? "/admin"
+                          : "/profile"
+                      }
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Button variant="outline" className="w-full gap-2">
+                        <User className="w-4 h-4" />
+                        {user?.name || user?.username || "Profile"}
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      className="w-full gap-2"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </Button>
+                  </>
+                )}
               </motion.div>
             </div>
           </motion.div>
